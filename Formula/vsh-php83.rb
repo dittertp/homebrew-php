@@ -25,6 +25,7 @@ class VshPhp83 < Formula
   depends_on "gettext"
   depends_on "gmp"
   depends_on "icu4c@77"
+  depends_on "imagemagick"
   depends_on "krb5"
   depends_on "libpq"
   depends_on "libsodium"
@@ -37,7 +38,6 @@ class VshPhp83 < Formula
   depends_on "tidy-html5"
   depends_on "unixodbc"
   depends_on "webp"
-  depends_on "imagemagick"
 
   uses_from_macos "xz" => :build
   uses_from_macos "bzip2"
@@ -46,8 +46,6 @@ class VshPhp83 < Formula
   uses_from_macos "libxml2"
   uses_from_macos "libxslt"
   uses_from_macos "zlib"
-
-  patch :DATA
 
   resource "xdebug_module" do
     url "https://github.com/xdebug/xdebug/archive/refs/tags/3.3.0alpha3.tar.gz"
@@ -59,11 +57,13 @@ class VshPhp83 < Formula
     sha256 "aa2e311efb7348350c7332876252720af6fb71210d13268de765bc41f51128f9"
   end
 
+  patch :DATA
+
   def install
     # buildconf required due to system library linking bug patch
     system "./buildconf", "--force"
 
-    config_path = etc/"#{name}"
+    config_path = etc/name
     # Prevent system pear config from inhibiting pear install
     (config_path/"pear.conf").delete if (config_path/"pear.conf").exist?
 
@@ -166,15 +166,15 @@ class VshPhp83 < Formula
     system "make"
     system "make", "install"
 
-    resource("xdebug_module").stage {
+    resource("xdebug_module").stage do
       system "#{bin}/phpize#{bin_suffix}"
       system "./configure", "--with-php-config=#{bin}/php-config#{bin_suffix}"
       system "make", "clean"
       system "make", "all"
       system "make", "install"
-    }
+    end
 
-    resource("imagick_module").stage {
+    resource("imagick_module").stage do
       args = %W[
         --with-imagick=#{Formula["imagemagick"].opt_prefix}
       ]
@@ -183,7 +183,7 @@ class VshPhp83 < Formula
       system "make", "clean"
       system "make", "all"
       system "make", "install"
-    }
+    end
 
     # Use OpenSSL cert bundle
     openssl = Formula["openssl@3"]
@@ -214,31 +214,25 @@ class VshPhp83 < Formula
       touch var/"log/php-fpm#{bin_suffix}.log"
     end
 
-    #mv "#{bin}/pecl", "#{bin}/pecl#{bin_suffix}"
-    #mv "#{bin}/pear", "#{bin}/pear#{bin_suffix}"
-    #mv "#{bin}/peardev", "#{bin}/peardev#{bin_suffix}"
-
+    # mv "#{bin}/pecl", "#{bin}/pecl#{bin_suffix}"
+    # mv "#{bin}/pear", "#{bin}/pear#{bin_suffix}"
+    # mv "#{bin}/peardev", "#{bin}/peardev#{bin_suffix}"
   end
 
   def post_install
-
     # check if php extension dir (e.g. 20180731) exists and is not a symlink
     # only relevant when running "brew postinstall" manually
     if (lib/"#{name}/#{php_ext_dir}").exist? && !(lib/"#{name}/#{php_ext_dir}").symlink?
-        unless (var/"#{name}/#{php_ext_dir}").exist?
-            (var/"#{name}/#{php_ext_dir}").mkpath
-        end
+        (var/"#{name}/#{php_ext_dir}").mkpath unless (var/"#{name}/#{php_ext_dir}").exist?
 
         Dir.glob(lib/"#{name}/#{php_ext_dir}/*") do |php_module|
             php_module_name = File.basename(php_module)
-            mv "#{php_module}", var/"#{name}/#{php_ext_dir}/#{php_module_name}"
+            mv php_module.to_s, var/"#{name}/#{php_ext_dir}/#{php_module_name}"
         end
 
         rm_r lib/"#{name}/#{php_ext_dir}"
         ln_s var/"#{name}/#{php_ext_dir}", lib/"#{name}/#{php_ext_dir}"
     end
-
-
 
     %w[
       opcache
@@ -262,18 +256,18 @@ class VshPhp83 < Formula
   end
 
   def bin_suffix
-    "#{php_version}"
+    php_version.to_s
   end
 
   def php_ext_dir
-    extension_dir = Utils.popen_read("#{bin}/php-config#{bin_suffix} --extension-dir").chomp
+    extension_dir = Utils.safe_popen_read("#{bin}/php-config#{bin_suffix}", "--extension-dir").chomp
     File.basename(extension_dir)
   end
 
-  service do 
+  service do
     php_version = @formula.version.to_s.split(".")[0..1].join(".")
     bin_suffix = php_version
-  
+
     run ["#{opt_sbin}/php-fpm#{bin_suffix}", "--nodaemonize"]
     keep_alive true
     working_dir var
@@ -281,8 +275,8 @@ class VshPhp83 < Formula
   end
 
   test do
-    assert_match /^Zend OPcache$/, shell_output("#{bin}/php -i"),
-      "Zend OPCache extension not loaded"
+    assert_match(/^Zend OPcache$/, shell_output("#{bin}/php -i"),
+      "Zend OPCache extension not loaded")
     # Test related to libxml2 and
     # https://github.com/Homebrew/homebrew-core/issues/28398
     assert_includes MachO::Tools.dylibs("#{bin}/php"),
@@ -291,8 +285,8 @@ class VshPhp83 < Formula
     system "#{bin}/phpdbg#{bin_suffix}", "-V"
     system "#{bin}/php-cgi#{bin_suffix}", "-m"
     # Prevent SNMP extension to be added
-    assert_no_match /^snmp$/, shell_output("#{bin}/php -m"),
-      "SNMP extension doesn't work reliably with Homebrew on High Sierra"
+    assert_no_match(/^snmp$/, shell_output("#{bin}/php -m"),
+      "SNMP extension doesn't work reliably with Homebrew on High Sierra")
     begin
       require "socket"
 
