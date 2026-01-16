@@ -292,7 +292,6 @@ class VshPhp83 < Formula
       server = TCPServer.new(0)
       port = server.addr[1]
       server_fpm = TCPServer.new(0)
-      port_fpm = server_fpm.addr[1]
       server.close
       server_fpm.close
 
