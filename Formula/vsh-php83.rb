@@ -9,8 +9,9 @@ class VshPhp83 < Formula
   revision 3
 
   bottle do
-    root_url "https://github.com/valet-sh/homebrew-core-arm/releases/download/bottles"
+    root_url "https://ghcr.io/v2/dittertp/php"
     sha256 arm64_sequoia: "067e3d1cb35b941d9ee36b44431bda5471920fea20618181d10c6db81532b98d"
+    sha256 arm64_tahoe:   "53fe403fcc418632cd29410d8070270eebb0b25e636d63b1db952446ca4d0ebd"
   end
 
   depends_on "pkg-config" => :build
