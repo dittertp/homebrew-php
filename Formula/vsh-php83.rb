@@ -274,17 +274,17 @@ class VshPhp83 < Formula
   end
 
   test do
-    assert_match(/^Zend OPcache$/, shell_output("#{bin}/php{bin_suffix} -i"),
+    assert_match(/^Zend OPcache$/, shell_output("#{bin}/php#{bin_suffix} -i"),
       "Zend OPCache extension not loaded")
     # Test related to libxml2 and
     # https://github.com/Homebrew/homebrew-core/issues/28398
-    assert_includes MachO::Tools.dylibs("#{bin}/php{bin_suffix}"),
+    assert_includes MachO::Tools.dylibs("#{bin}/php#{bin_suffix}"),
       "#{Formula["libpq"].opt_lib}/libpq.5.dylib"
     system "#{sbin}/php-fpm#{bin_suffix}", "-t"
     system "#{bin}/phpdbg#{bin_suffix}", "-V"
     system "#{bin}/php-cgi#{bin_suffix}", "-m"
     # Prevent SNMP extension to be added
-    assert_no_match(/^snmp$/, shell_output("#{bin}/php{bin_suffix} -m"),
+    assert_no_match(/^snmp$/, shell_output("#{bin}/php#{bin_suffix} -m"),
       "SNMP extension doesn't work reliably with Homebrew on High Sierra")
     begin
       require "socket"
