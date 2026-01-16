@@ -3,15 +3,13 @@ class VshPhp83 < Formula
   homepage "https://www.php.net/"
   # Should only be updated if the new version is announced on the homepage, https://www.php.net/
   url "https://www.php.net/distributions/php-8.3.13.tar.xz"
-  mirror "https://fossies.org/linux/www/php-8.3.13.tar.xz"
   sha256 "89adb978cca209124fe53fd6327bc4966ca21213a7fa2e9504f854e340873018"
   license "PHP-3.01"
-  revision 3
+  # revision 1
 
   bottle do
     root_url "https://ghcr.io/v2/dittertp/php"
     sha256 arm64_sequoia: "067e3d1cb35b941d9ee36b44431bda5471920fea20618181d10c6db81532b98d"
-    sha256 arm64_tahoe:   "53fe403fcc418632cd29410d8070270eebb0b25e636d63b1db952446ca4d0ebd"
   end
 
   depends_on "pkg-config" => :build
@@ -276,17 +274,17 @@ class VshPhp83 < Formula
   end
 
   test do
-    assert_match(/^Zend OPcache$/, shell_output("#{bin}/php -i"),
+    assert_match(/^Zend OPcache$/, shell_output("#{bin}/php{bin_suffix} -i"),
       "Zend OPCache extension not loaded")
     # Test related to libxml2 and
     # https://github.com/Homebrew/homebrew-core/issues/28398
-    assert_includes MachO::Tools.dylibs("#{bin}/php"),
+    assert_includes MachO::Tools.dylibs("#{bin}/php{bin_suffix}"),
       "#{Formula["libpq"].opt_lib}/libpq.5.dylib"
     system "#{sbin}/php-fpm#{bin_suffix}", "-t"
     system "#{bin}/phpdbg#{bin_suffix}", "-V"
     system "#{bin}/php-cgi#{bin_suffix}", "-m"
     # Prevent SNMP extension to be added
-    assert_no_match(/^snmp$/, shell_output("#{bin}/php -m"),
+    assert_no_match(/^snmp$/, shell_output("#{bin}/php{bin_suffix} -m"),
       "SNMP extension doesn't work reliably with Homebrew on High Sierra")
     begin
       require "socket"
@@ -304,44 +302,7 @@ class VshPhp83 < Formula
         echo 'Hello world!' . PHP_EOL;
         var_dump(ldap_connect());
       EOS
-      main_config = <<~EOS
-        Listen #{port}
-        ServerName localhost:#{port}
-        DocumentRoot "#{testpath}"
-        ErrorLog "#{testpath}/httpd-error.log"
-        ServerRoot "#{Formula["httpd"].opt_prefix}"
-        PidFile "#{testpath}/httpd.pid"
-        LoadModule authz_core_module lib/httpd/modules/mod_authz_core.so
-        LoadModule unixd_module lib/httpd/modules/mod_unixd.so
-        LoadModule dir_module lib/httpd/modules/mod_dir.so
-        DirectoryIndex index.php
-      EOS
 
-      (testpath/"fpm.conf").write <<~EOS
-        [global]
-        daemonize=no
-        [www]
-        listen = 127.0.0.1:#{port_fpm}
-        pm = dynamic
-        pm.max_children = 5
-        pm.start_servers = 2
-        pm.min_spare_servers = 1
-        pm.max_spare_servers = 3
-      EOS
-
-      (testpath/"httpd-fpm.conf").write <<~EOS
-        #{main_config}
-        LoadModule mpm_event_module lib/httpd/modules/mod_mpm_event.so
-        LoadModule proxy_module lib/httpd/modules/mod_proxy.so
-        LoadModule proxy_fcgi_module lib/httpd/modules/mod_proxy_fcgi.so
-        <FilesMatch \\.(php|phar)$>
-          SetHandler "proxy:fcgi://127.0.0.1:#{port_fpm}"
-        </FilesMatch>
-      EOS
-
-      pid = fork do
-        exec Formula["httpd"].opt_bin/"httpd", "-X", "-f", "#{testpath}/httpd.conf"
-      end
       sleep 3
 
       assert_match expected_output, shell_output("curl -s 127.0.0.1:#{port}")
@@ -351,9 +312,6 @@ class VshPhp83 < Formula
 
       fpm_pid = fork do
         exec sbin/"php-fpm#{bin_suffix}", "-y", "fpm.conf"
-      end
-      pid = fork do
-        exec Formula["httpd"].opt_bin/"httpd", "-X", "-f", "#{testpath}/httpd-fpm.conf"
       end
       sleep 3
 
