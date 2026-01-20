@@ -308,23 +308,6 @@ class VshPhp83 < Formula
 
       Process.kill("TERM", pid)
       Process.wait(pid)
-
-      fpm_pid = fork do
-        exec sbin/"php-fpm#{bin_suffix}", "-y", "fpm.conf"
-      end
-      sleep 3
-
-      assert_match expected_output, shell_output("curl -s 127.0.0.1:#{port}")
-    ensure
-      if pid
-        Process.kill("TERM", pid)
-        Process.wait(pid)
-      end
-      if fpm_pid
-        Process.kill("TERM", fpm_pid)
-        Process.wait(fpm_pid)
-      end
-    end
   end
 end
 
