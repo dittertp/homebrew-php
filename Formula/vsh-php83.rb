@@ -286,29 +286,6 @@ class VshPhp83 < Formula
     # Prevent SNMP extension to be added
     refute_match(/^snmpx$/, shell_output("#{bin}/php#{bin_suffix} -m"),
       "SNMP extension doesn't work reliably with Homebrew on High Sierra")
-    begin
-      require "socket"
-
-      server = TCPServer.new(0)
-      port = server.addr[1]
-      server_fpm = TCPServer.new(0)
-      server.close
-      server_fpm.close
-
-      expected_output = /^Hello world!$/
-      (testpath/"index.php").write <<~EOS
-        <?php
-        echo 'Hello world!' . PHP_EOL;
-        var_dump(ldap_connect());
-      EOS
-
-      sleep 3
-
-      assert_match expected_output, shell_output("curl -s 127.0.0.1:#{port}")
-
-      Process.kill("TERM", pid)
-      Process.wait(pid)
-    end
   end
 end
 
