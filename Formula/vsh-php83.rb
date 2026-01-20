@@ -5,7 +5,7 @@ class VshPhp83 < Formula
   url "https://www.php.net/distributions/php-8.3.13.tar.xz"
   sha256 "89adb978cca209124fe53fd6327bc4966ca21213a7fa2e9504f854e340873018"
   license "PHP-3.01"
-  revision 1
+  revision 2
 
   bottle do
     root_url "https://ghcr.io/v2/dittertp/php"
