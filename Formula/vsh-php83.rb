@@ -308,6 +308,7 @@ class VshPhp83 < Formula
 
       Process.kill("TERM", pid)
       Process.wait(pid)
+    end
   end
 end
 
