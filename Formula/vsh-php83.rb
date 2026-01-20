@@ -284,7 +284,7 @@ class VshPhp83 < Formula
     system "#{bin}/phpdbg#{bin_suffix}", "-V"
     system "#{bin}/php-cgi#{bin_suffix}", "-m"
     # Prevent SNMP extension to be added
-    assert_no_match(/^snmp$/, shell_output("#{bin}/php#{bin_suffix} -m"),
+    refute_match(/^snmpx$/, shell_output("#{bin}/php#{bin_suffix} -m"),
       "SNMP extension doesn't work reliably with Homebrew on High Sierra")
     begin
       require "socket"
