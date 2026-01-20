@@ -8,8 +8,8 @@ class VshPhp83 < Formula
   revision 1
 
   bottle do
-    root_url "https://github.com/dittertp/homebrew-php/releases/download/vsh-php83-8.3.13"
-    sha256 arm64_tahoe: "5fbfe7bea717e6e0e830c2733fd3dddec39990c8d424ea231c1700ad60f454c3"
+    root_url "https://github.com/dittertp/homebrew-php/releases/download/vsh-php83-8.3.13_1"
+    sha256 arm64_tahoe: "7b2cd2f71fa74ddc7486541f5b4022820e272d5828c9e23c150dd8f5b73a96ed"
   end
 
   depends_on "pkg-config" => :build
