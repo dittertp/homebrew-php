@@ -5,10 +5,10 @@ class VshPhp83 < Formula
   url "https://www.php.net/distributions/php-8.3.13.tar.xz"
   sha256 "89adb978cca209124fe53fd6327bc4966ca21213a7fa2e9504f854e340873018"
   license "PHP-3.01"
-  revision 2
+  revision 3
 
   bottle do
-    root_url "https://github.com/dittertp/homebrew-php/releases/download/vsh-php83-8.3.13_2"
+    root_url "https://ghcr.io/v2/dittertp/php"
     sha256 arm64_tahoe: "71e17b535a52d1a7cdcaa46c16c360503af82b6c48d122b299c5f3e9bf2cefdb"
   end
 
