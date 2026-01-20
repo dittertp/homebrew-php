@@ -8,8 +8,8 @@ class VshPhp83 < Formula
   # revision 1
 
   bottle do
-    root_url "https://ghcr.io/v2/dittertp/moep"
-    sha256 arm64_tahoe: "409fd8ea92a12a0c261271e418da3a415d5253cef94fcb8e91c0e50e6d8b6630"
+    root_url "https://ghcr.io/v2/dittertp/php"
+    sha256 arm64_tahoe: "720b76ddd7513c767f4ab0b81c46360cf105f4250abaf5480f10fbf65a906f7b"
   end
 
   depends_on "bison" => :build
