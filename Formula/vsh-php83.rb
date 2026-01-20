@@ -1,18 +1,19 @@
 class VshPhp83 < Formula
   desc "General-purpose scripting language"
   homepage "https://www.php.net/"
-  # Should only be updated if the new version is announced on the homepage, https://www.php.net/
-  url "https://www.php.net/distributions/php-8.3.13.tar.xz"
-  sha256 "89adb978cca209124fe53fd6327bc4966ca21213a7fa2e9504f854e340873018"
+  url "https://www.php.net/distributions/php-8.3.25.tar.xz"
+  mirror "https://fossies.org/linux/www/php-8.3.25.tar.xz"
+  sha256 "187b61bb795015adacf53f8c55b44414a63777ec19a776b75fb88614506c0d37"
   license "PHP-3.01"
-  revision 3
+  # revision 1
 
   bottle do
     root_url "https://ghcr.io/v2/dittertp/moep"
     sha256 arm64_tahoe: "409fd8ea92a12a0c261271e418da3a415d5253cef94fcb8e91c0e50e6d8b6630"
   end
 
-  depends_on "pkg-config" => :build
+  depends_on "bison" => :build
+  depends_on "pkgconfig" => :build
   depends_on "apr"
   depends_on "apr-util"
   depends_on "argon2"
@@ -20,6 +21,7 @@ class VshPhp83 < Formula
   depends_on "autoconf"
   depends_on "curl"
   depends_on "freetds"
+  depends_on "gcc"
   depends_on "gd"
   depends_on "gettext"
   depends_on "gmp"
@@ -38,7 +40,6 @@ class VshPhp83 < Formula
   depends_on "unixodbc"
   depends_on "webp"
 
-  uses_from_macos "xz" => :build
   uses_from_macos "bzip2"
   uses_from_macos "libedit"
   uses_from_macos "libffi", since: :catalina
@@ -46,19 +47,27 @@ class VshPhp83 < Formula
   uses_from_macos "libxslt"
   uses_from_macos "zlib"
 
+  fails_with :clang do
+    cause "Performs worse due to lack of general global register variables"
+  end
+
   resource "xdebug_module" do
-    url "https://github.com/xdebug/xdebug/archive/refs/tags/3.3.0alpha3.tar.gz"
-    sha256 "b6ed70867900d5fa76843f778a27c0ffbda1c1911a154cbbdf8b1b1884f791bc"
+    url "https://github.com/xdebug/xdebug/archive/refs/tags/3.3.1.tar.gz"
+    sha256 "76d0467154d7f2714a07f88c7c17658e24dd58fb919a9aa08ab4bc23dccce76d"
   end
 
   resource "imagick_module" do
-    url "https://github.com/Imagick/imagick/archive/refs/tags/3.7.0.tar.gz"
-    sha256 "aa2e311efb7348350c7332876252720af6fb71210d13268de765bc41f51128f9"
+    url "https://github.com/Imagick/imagick/archive/refs/tags/3.8.0.tar.gz"
+    sha256 "a964e54a441392577f195d91da56e0b3cf30c32e6d60d0531a355b37bb1e1a59"
   end
 
   patch :DATA
 
   def install
+    # GCC -Os performs worse than -O1 and significantly worse than -O2/-O3.
+    # We lack a DSL to enable -O2 so just use -O3 which is similar.
+    ENV.O3 if OS.mac?
+
     # buildconf required due to system library linking bug patch
     system "./buildconf", "--force"
 
@@ -86,7 +95,7 @@ class VshPhp83 < Formula
     # sdk path or it won't find the headers
     headers_path = "=#{MacOS.sdk_path_if_needed}/usr"
 
-    ENV["EXTENSION_DIR"] = "#{prefix}/lib/#{name}/20210902"
+    ENV["EXTENSION_DIR"] = "#{prefix}/lib/#{name}/20230831"
     ENV["PHP_PEAR_PHP_BIN"] = "#{bin}/php#{bin_suffix}"
 
     args = %W[
@@ -112,6 +121,7 @@ class VshPhp83 < Formula
       --enable-mbregex
       --enable-mbstring
       --enable-mysqlnd
+      --enable-opcache
       --enable-pcntl
       --enable-phpdbg
       --enable-phpdbg-readline
@@ -141,7 +151,7 @@ class VshPhp83 < Formula
       --with-mysqli=mysqlnd
       --with-ndbm#{headers_path}
       --with-openssl
-      --with-password-argon2=#{Formula["argon2"].opt_prefix}
+      --with-password-argon2
       --with-pdo-dblib=#{Formula["freetds"].opt_prefix}
       --with-pdo-mysql=mysqlnd
       --with-pdo-odbc=unixODBC,#{Formula["unixodbc"].opt_prefix}
@@ -167,6 +177,12 @@ class VshPhp83 < Formula
 
     resource("xdebug_module").stage do
       system "#{bin}/phpize#{bin_suffix}"
+
+      # rubocop:disable all
+      ENV["CC"] = "/usr/bin/clang"
+      ENV["CXX"] = "/usr/bin/clang++"
+      # rubocop:enable all
+
       system "./configure", "--with-php-config=#{bin}/php-config#{bin_suffix}"
       system "make", "clean"
       system "make", "all"
@@ -213,9 +229,9 @@ class VshPhp83 < Formula
       touch var/"log/php-fpm#{bin_suffix}.log"
     end
 
-    # mv "#{bin}/pecl", "#{bin}/pecl#{bin_suffix}"
-    # mv "#{bin}/pear", "#{bin}/pear#{bin_suffix}"
-    # mv "#{bin}/peardev", "#{bin}/peardev#{bin_suffix}"
+    mv "#{bin}/pecl", "#{bin}/pecl#{bin_suffix}"
+    mv "#{bin}/pear", "#{bin}/pear#{bin_suffix}"
+    mv "#{bin}/peardev", "#{bin}/peardev#{bin_suffix}"
   end
 
   def post_install
