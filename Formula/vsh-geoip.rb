@@ -12,9 +12,6 @@ class VshGeoip < Formula
     sha256 arm64_tahoe: "4cce6b57f254b8f145982591007091cf8eea6337baa95a65256d42a71172f96e"
   end
 
-  conflicts_with "geoip",
-    because: "geoip has been disabled"
-
   resource "database" do
     url "https://src.fedoraproject.org/lookaside/pkgs/GeoIP/GeoIP.dat.gz/4bc1e8280fe2db0adc3fe48663b8926e/GeoIP.dat.gz"
     sha256 "7fd7e4829aaaae2677a7975eeecd170134195e5b7e6fc7d30bf3caf34db41bcd"
