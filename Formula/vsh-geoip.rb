@@ -11,8 +11,8 @@ class VshGeoip < Formula
     because: "geoip has been disabled"
 
   bottle do
-    root_url "https://github.com/valet-sh/homebrew-core-arm/releases/download/bottles"
-    sha256 arm64_tahoe: "4cce6b57f254b8f145982591007091cf8eea6337baa95a65256d42a61172f96e"
+    root_url "https://ghcr.io/v2/dittertp/php"
+    sha256 arm64_tahoe: "4cce6b57f254b8f145982591007091cf8eea6337baa95a65256d42a71172f96e"
   end
 
   resource "database" do
