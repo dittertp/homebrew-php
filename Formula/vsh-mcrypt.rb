@@ -7,7 +7,7 @@ class VshMcrypt < Formula
 
   bottle do
     root_url "https://ghcr.io/v2/dittertp/php"
-    sha256 arm64_tahoe: "e6d7d95fc33e7e07b117e1c09f6476719a667bb9723f04036a144b39192d3632"
+    sha256 cellar: :any, arm64_tahoe: "b6018711f6ca639efda97a81995a0126d3ec6bb5e7082fc544bdc07610408bae"
   end
 
   # Added automake as a build dependency to update config files in libmcrypt.
