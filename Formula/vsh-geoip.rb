@@ -9,7 +9,7 @@ class VshGeoip < Formula
 
   bottle do
     root_url "https://ghcr.io/v2/dittertp/php"
-    sha256 arm64_tahoe: "4cce6b57f254b8f145982591007091cf8eea6337baa95a65256d42a71172f96e"
+    sha256 cellar: :any, arm64_tahoe: "aa8ca1237358cf2df8bb88ac4740d10b77de15ac8e3dae40f09cb0a1a8267c44"
   end
 
   resource "database" do
