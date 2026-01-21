@@ -9,7 +9,7 @@ class VshPhp56 < Formula
 
   bottle do
     root_url "https://ghcr.io/v2/dittertp/php"
-    sha256 sonoma: "28be53d5d4522b810c8316b591f4fc8c85ca938f1a159291bf2c190c37feec3c"
+    sha256 arm64_tahoe: "28be53d5d4522b810c8316b591f4fc8c85ca938f1a159291bf2c190c37feec3c"
   end
 
   depends_on "bison" => :build
